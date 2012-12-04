@@ -1,21 +1,12 @@
 /*  minIni glue functions for FAT library by CCS, Inc. (as provided with their
  *  PIC MCU compiler)
  *
- *  Copyright (c) CompuPhase, 2011-2012
+ *  By CompuPhase, 2011-2012
+ *  This "glue file" is in the public domain. It is distributed without
+ *  warranties or conditions of any kind, either express or implied.
+ *
  *  (The FAT library is copyright (c) 2007 Custom Computer Services, and
  *  licensed at its own terms.)
- *
- *  This "glue file" is licensed under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- *  License for the specific language governing permissions and limitations
- *  under the License.
  */
 
 #define INI_BUFFERSIZE  256       /* maximum line length, maximum path length */

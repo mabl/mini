@@ -65,11 +65,12 @@
 
 #if defined __linux || defined __linux__
   #define __LINUX__
-#endif
-#if defined FREEBSD && !defined __FreeBSD__
+#elif defined FREEBSD && !defined __FreeBSD__
   #define __FreeBSD__
+#elif defined(_MSC_VER)
+  #pragma warning(disable: 4996)	/* for Microsoft Visual C/C++ */
 #endif
-#if !defined strnicmp
+#if !defined strnicmp && !defined PORTABLE_STRNICMP
   #if defined __LINUX__ || defined __FreeBSD__ || defined __OpenBSD__ || defined __APPLE__
     #define strnicmp  strncasecmp
   #endif
@@ -91,6 +92,25 @@ enum quote_option {
   QUOTE_ENQUOTE,
   QUOTE_DEQUOTE,
 };
+
+#if defined PORTABLE_STRNICMP
+int strnicmp(const TCHAR *s1, const TCHAR *s2, size_t n)
+{
+  register int c1, c2;
+
+  while (n-- != 0 && (*s1 || *s2)) {
+    c1 = *s1++;
+    if ('a' <= c1 && c1 <= 'z')
+      c1 += ('A' - 'a');
+    c2 = *s2++;
+    if ('a' <= c2 && c2 <= 'z')
+      c2 += ('A' - 'a');
+    if (c1 != c2)
+      return c1 - c2;
+  } /* while */
+  return 0;
+}
+#endif /* PORTABLE_STRNICMP */
 
 static TCHAR *skipleading(const TCHAR *str)
 {
@@ -809,23 +829,3 @@ int ini_putf(const TCHAR *Section, const TCHAR *Key, INI_REAL Value, const TCHAR
 }
 #endif /* INI_REAL */
 #endif /* !INI_READONLY */
-
-
-#if defined PORTABLE_STRNICMP
-int strnicmp(const TCHAR *s1, const TCHAR *s2, size_t n)
-{
-  register int c1, c2;
-
-  while (n-- != 0 && (*s1 || *s2)) {
-    c1 = *s1++;
-    if ('a' <= c1 && c1 <= 'z')
-      c1 += ('A' - 'a');
-    c2 = *s2++;
-    if ('a' <= c2 && c2 <= 'z')
-      c2 += ('A' - 'a');
-    if (c1 != c2)
-      return c1 - c2;
-  } /* while */
-  return 0;
-}
-#endif /* PORTABLE_STRNICMP */
