@@ -51,7 +51,7 @@ int main(void)
   s = ini.gets("second", "alt", "aap");
   assert(s=="correct");
 
-  n = ini.put("third", "alt", "correct");
+  b = ini.put("third", "alt", "correct");
   assert(b);
   s = ini.gets("third", "alt", "aap" );
   assert(s=="correct");

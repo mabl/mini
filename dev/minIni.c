@@ -3,7 +3,7 @@
  *  These routines are in part based on the article "Multiplatform .INI Files"
  *  by Joseph J. Graf in the March 1994 issue of Dr. Dobb's Journal.
  *
- *  Copyright (c) CompuPhase, 2008-2012
+ *  Copyright (c) CompuPhase, 2008-2013
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *  use this file except in compliance with the License. You may obtain a copy
@@ -77,7 +77,11 @@
 #endif
 
 #if !defined INI_LINETERM
-  #define INI_LINETERM    __T("\n")
+  #if defined __LINUX__ || defined __FreeBSD__ || defined __OpenBSD__ || defined __APPLE__
+    #define INI_LINETERM    __T("\n")
+  #else
+    #define INI_LINETERM    __T("\r\n")
+  #endif
 #endif
 #if !defined INI_FILETYPE
   #error Missing definition for INI_FILETYPE.
@@ -452,7 +456,6 @@ int  ini_getkey(const TCHAR *Section, int idx, TCHAR *Buffer, int BufferSize, co
 int  ini_browse(INI_CALLBACK Callback, const void *UserData, const TCHAR *Filename)
 {
   TCHAR LocalBuffer[INI_BUFFERSIZE];
-  TCHAR *sp, *ep;
   int lenSec, lenKey;
   enum quote_option quotes;
   INI_FILETYPE fp;
@@ -465,6 +468,7 @@ int  ini_browse(INI_CALLBACK Callback, const void *UserData, const TCHAR *Filena
   LocalBuffer[0] = '\0';   /* copy an empty section in the buffer */
   lenSec = _tcslen(LocalBuffer) + 1;
   for ( ;; ) {
+    TCHAR *sp, *ep;
     if (!ini_read(LocalBuffer + lenSec, INI_BUFFERSIZE - lenSec, &fp))
       break;
     sp = skipleading(LocalBuffer + lenSec);
@@ -529,9 +533,8 @@ static enum quote_option check_enquote(const TCHAR *Value)
 
 static void writesection(TCHAR *LocalBuffer, const TCHAR *Section, INI_FILETYPE *fp)
 {
-  TCHAR *p;
-
   if (Section != NULL && _tcslen(Section) > 0) {
+    TCHAR *p;
     LocalBuffer[0] = '[';
     save_strncpy(LocalBuffer + 1, Section, INI_BUFFERSIZE - 4, QUOTE_NONE);  /* -1 for '[', -1 for ']', -2 for '\r\n' */
     p = _tcsrchr(LocalBuffer, '\0');
@@ -769,11 +772,9 @@ int ini_puts(const TCHAR *Section, const TCHAR *Key, const TCHAR *Value, const T
 
 static void strreverse(TCHAR *str)
 {
-  TCHAR t;
   int i, j;
-
   for (i = 0, j = _tcslen(str) - 1; i < j; i++, j--) {
-    t = str[i];
+    TCHAR t = str[i];
     str[i] = str[j];
     str[j] = t;
   } /* for */
