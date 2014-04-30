@@ -75,6 +75,11 @@ int main(void)
   n = ini_gets("second", "alt", "dummy", str, sizearray(str), inifile);
   assert(n==9 && strcmp(str,"overwrite")==0);
   /* ----- */
+  n = ini_puts("second", "alt", "123456789", inifile);
+  assert(n==1);
+  n = ini_gets("second", "alt", "dummy", str, sizearray(str), inifile);
+  assert(n==9 && strcmp(str,"123456789")==0);
+  /* ----- */
   n = ini_puts(NULL, "alt", "correct", inifile2);
   assert(n==1);
   n = ini_gets(NULL, "alt", "dummy", str, sizearray(str), inifile2);
@@ -83,7 +88,7 @@ int main(void)
   printf("3. String writing tests passed\n");
 
   /* section/key enumeration */
-  printf("4. Section/key enumertion, file contents follows\n");
+  printf("4. Section/key enumertion, file structure follows\n");
   for (s = 0; ini_getsection(s, section, sizearray(section), inifile) > 0; s++) {
     printf("    [%s]\n", section);
     for (k = 0; ini_getkey(section, k, str, sizearray(str), inifile) > 0; k++) {
@@ -92,7 +97,7 @@ int main(void)
   } /* for */
 
   /* browsing through the file */
-  printf("5. browse through all settings, file contents follows\n");
+  printf("5. browse through all settings, file field list follows\n");
   ini_browse(Callback, NULL, inifile);
 
   /* string deletion */
