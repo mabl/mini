@@ -119,7 +119,7 @@ int strnicmp(const TCHAR *s1, const TCHAR *s2, size_t n)
 static TCHAR *skipleading(const TCHAR *str)
 {
   assert(str != NULL);
-  while (*str != '\0' && *str <= ' ')
+  while ('\0' < *str && *str <= ' ')
     str++;
   return (TCHAR *)str;
 }
@@ -128,7 +128,7 @@ static TCHAR *skiptrailing(const TCHAR *str, const TCHAR *base)
 {
   assert(str != NULL);
   assert(base != NULL);
-  while (str > base && *(str-1) <= ' ')
+  while (str > base && '\0' < *(str-1) && *(str-1) <= ' ')
     str--;
   return (TCHAR *)str;
 }
@@ -315,7 +315,7 @@ int ini_gets(const TCHAR *Section, const TCHAR *Key, const TCHAR *DefValue,
     (void)ini_close(&fp);
   } /* if */
   if (!ok)
-    save_strncpy(Buffer, DefValue, BufferSize, QUOTE_NONE);
+    save_strncpy(Buffer, (DefValue != NULL) ? DefValue : __T(""), BufferSize, QUOTE_NONE);
   return _tcslen(Buffer);
 }
 
