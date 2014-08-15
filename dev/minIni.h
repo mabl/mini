@@ -21,7 +21,7 @@
 
 #include "minGlue.h"
 
-#if (defined _UNICODE || defined __UNICODE__ || defined UNICODE) && !defined MININI_ANSI
+#if (defined _UNICODE || defined __UNICODE__ || defined UNICODE) && !defined INI_ANSIONLY
   #include <tchar.h>
   #define mTCHAR TCHAR
 #else

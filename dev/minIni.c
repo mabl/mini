@@ -20,7 +20,7 @@
  *  Version: $Id$
  */
 
-#if (defined _UNICODE || defined __UNICODE__ || defined UNICODE) && !defined MININI_ANSI
+#if (defined _UNICODE || defined __UNICODE__ || defined UNICODE) && !defined INI_ANSIONLY
 # if !defined UNICODE   /* for Windows */
 #   define UNICODE
 # endif
