@@ -3,7 +3,7 @@
  *  These routines are in part based on the article "Multiplatform .INI Files"
  *  by Joseph J. Graf in the March 1994 issue of Dr. Dobb's Journal.
  *
- *  Copyright (c) CompuPhase, 2008-2014
+ *  Copyright (c) CompuPhase, 2008-2015
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *  use this file except in compliance with the License. You may obtain a copy
@@ -37,7 +37,7 @@
   #include <assert.h>
 #endif
 
-#if !defined __T
+#if !defined __T || defined INI_ANSIONLY
   #include <ctype.h>
   #include <string.h>
   #include <stdlib.h>
@@ -74,6 +74,9 @@
   #if defined __LINUX__ || defined __FreeBSD__ || defined __OpenBSD__ || defined __APPLE__
     #define strnicmp  strncasecmp
   #endif
+#endif
+#if !defined _totupper
+  #define _totupper toupper
 #endif
 
 #if !defined INI_LINETERM
@@ -233,7 +236,7 @@ static int getkeystring(INI_FILETYPE *fp, const TCHAR *Section, const TCHAR *Key
    * parameter Section is NULL, only look at keys above the first section. If
    * idxSection is postive, copy the relevant section name.
    */
-  len = (Section != NULL) ? _tcslen(Section) : 0;
+  len = (Section != NULL) ? (int)_tcslen(Section) : 0;
   if (len > 0 || idxSection >= 0) {
     idx = -1;
     do {
@@ -316,7 +319,7 @@ int ini_gets(const TCHAR *Section, const TCHAR *Key, const TCHAR *DefValue,
   } /* if */
   if (!ok)
     save_strncpy(Buffer, (DefValue != NULL) ? DefValue : __T(""), BufferSize, QUOTE_NONE);
-  return _tcslen(Buffer);
+  return (int)_tcslen(Buffer);
 }
 
 /** ini_getl()
@@ -412,7 +415,7 @@ int  ini_getsection(int idx, TCHAR *Buffer, int BufferSize, const TCHAR *Filenam
   } /* if */
   if (!ok)
     *Buffer = '\0';
-  return _tcslen(Buffer);
+  return (int)_tcslen(Buffer);
 }
 
 /** ini_getkey()
@@ -438,7 +441,7 @@ int  ini_getkey(const TCHAR *Section, int idx, TCHAR *Buffer, int BufferSize, co
   } /* if */
   if (!ok)
     *Buffer = '\0';
-  return _tcslen(Buffer);
+  return (int)_tcslen(Buffer);
 }
 
 
@@ -470,7 +473,7 @@ int  ini_browse(INI_CALLBACK Callback, const void *UserData, const TCHAR *Filena
     return 0;
 
   LocalBuffer[0] = '\0';   /* copy an empty section in the buffer */
-  lenSec = _tcslen(LocalBuffer) + 1;
+  lenSec = (int)_tcslen(LocalBuffer) + 1;
   for ( ;; ) {
     TCHAR *sp, *ep;
     if (!ini_read(LocalBuffer + lenSec, INI_BUFFERSIZE - lenSec, &fp))
@@ -484,7 +487,7 @@ int  ini_browse(INI_CALLBACK Callback, const void *UserData, const TCHAR *Filena
     if (*sp == '[' && ep != NULL) {
       *ep = '\0';
       save_strncpy(LocalBuffer, sp + 1, INI_BUFFERSIZE, QUOTE_NONE);
-      lenSec = _tcslen(LocalBuffer) + 1;
+      lenSec = (int)_tcslen(LocalBuffer) + 1;
       continue;
     } /* if */
     /* not a new section, test for a key/value pair */
@@ -496,7 +499,7 @@ int  ini_browse(INI_CALLBACK Callback, const void *UserData, const TCHAR *Filena
     *ep++ = '\0';             /* split the key from the value */
     striptrailing(sp);
     save_strncpy(LocalBuffer + lenSec, sp, INI_BUFFERSIZE - lenSec, QUOTE_NONE);
-    lenKey = _tcslen(LocalBuffer + lenSec) + 1;
+    lenKey = (int)_tcslen(LocalBuffer + lenSec) + 1;
     /* clean up the value */
     sp = skipleading(ep);
     sp = cleanstring(sp, &quotes);  /* Remove a trailing comment */
@@ -568,7 +571,7 @@ static void writekey(TCHAR *LocalBuffer, const TCHAR *Key, const TCHAR *Value, I
 
 static int cache_accum(const TCHAR *string, int *size, int max)
 {
-  int len = _tcslen(string);
+  int len = (int)_tcslen(string);
   if (*size + len >= max)
     return 0;
   *size += len;
@@ -578,7 +581,7 @@ static int cache_accum(const TCHAR *string, int *size, int max)
 static int cache_flush(TCHAR *buffer, int *size,
                       INI_FILETYPE *rfp, INI_FILETYPE *wfp, INI_FILEPOS *mark)
 {
-  int terminator_len = _tcslen(INI_LINETERM);
+  int terminator_len = (int)_tcslen(INI_LINETERM);
   int pos = 0;
 
   (void)ini_seek(rfp, mark);
@@ -702,7 +705,7 @@ int ini_puts(const TCHAR *Section, const TCHAR *Key, const TCHAR *Value, const T
   /* Move through the file one line at a time until a section is
    * matched or until EOF. Copy to temp file as it is read.
    */
-  len = (Section != NULL) ? _tcslen(Section) : 0;
+  len = (Section != NULL) ? (int)_tcslen(Section) : 0;
   if (len > 0) {
     do {
       if (!ini_read(LocalBuffer, INI_BUFFERSIZE, &rfp)) {
@@ -746,7 +749,7 @@ int ini_puts(const TCHAR *Section, const TCHAR *Key, const TCHAR *Value, const T
    * upon leaving the section's area. Copy the file as it is read
    * and create an entry if one is not found.
    */
-  len = (Key!=NULL) ? _tcslen(Key) : 0;
+  len = (Key != NULL) ? (int)_tcslen(Key) : 0;
   for( ;; ) {
     if (!ini_read(LocalBuffer, INI_BUFFERSIZE, &rfp)) {
       /* EOF without an entry so make one */
@@ -815,7 +818,7 @@ int ini_puts(const TCHAR *Section, const TCHAR *Key, const TCHAR *Value, const T
 static void strreverse(TCHAR *str)
 {
   int i, j;
-  for (i = 0, j = _tcslen(str) - 1; i < j; i++, j--) {
+  for (i = 0, j = (int)_tcslen(str) - 1; i < j; i++, j--) {
     TCHAR t = str[i];
     str[i] = str[j];
     str[j] = t;
